@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.annimon.stream.Stream;
@@ -15,10 +16,12 @@ import com.minkov.twitterapp.utils.TweetTextArrayAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class TweetsActivity extends AppCompatActivity {
 
     private TweetsDataService tweetsDataService;
+    private ArrayAdapter<Tweet> adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,24 +33,25 @@ public class TweetsActivity extends AppCompatActivity {
 
         ListView tweetsListView = (ListView) this.findViewById(R.id.listview_tweets);
 
-        TweetTextArrayAdapter adapter = new TweetTextArrayAdapter(this, new ArrayList<Tweet>());
+        this.adapter = new TweetTextArrayAdapter(this, new ArrayList<Tweet>());
 
         tweetsListView.setAdapter(adapter);
 
-        TweetsDataService service = new TweetsDataService(updateAllTweets(adapter));
+        TweetsDataService service = new TweetsDataService();
+        service.setGetAllFinishedCallback((value) -> {
+            this.updateAllTweets(value);
+            return null;
+        });
+
         service.getGetAll().execute();
     }
 
     @NonNull
-    private Function<List<Tweet>, Void> updateAllTweets(TweetTextArrayAdapter adapter) {
-        return value -> {
-            List<Tweet> tweets = value;
-            Stream.of(tweets)
-                    .forEach(adapter::add);
-            this.runOnUiThread(() -> {
-                adapter.notifyDataSetChanged();
-            });
-            return null;
-        };
+    private void updateAllTweets(List<Tweet> tweets) {
+        Stream.of(tweets)
+                .forEach(this.adapter::add);
+        this.runOnUiThread(() -> {
+            adapter.notifyDataSetChanged();
+        });
     }
 }
