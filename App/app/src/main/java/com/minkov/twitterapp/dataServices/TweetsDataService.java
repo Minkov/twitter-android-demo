@@ -6,6 +6,7 @@ import com.annimon.stream.function.Function;
 import com.google.gson.Gson;
 import com.minkov.twitterapp.models.Tweet;
 import com.minkov.twitterapp.responses.ResponseWithResult;
+import com.minkov.twitterapp.responses.TweetDetailsResponse;
 import com.minkov.twitterapp.responses.TweetsResponse;
 import com.minkov.twitterapp.utils.HttpRequester;
 
@@ -17,11 +18,12 @@ import java.util.List;
  */
 public class TweetsDataService {
     private Function<List<Tweet>, Void> getAllFinishedCallback;
+    private Function<Tweet, Void> getByIdFinishedCallback;
 
     private AsyncTask<Void, Void, Void> getAll;
-    private AsyncTask<Void, Void, Void> getById;
+    private AsyncTask<Integer, Void, Void> getById;
     private HttpRequester requester;
-    private String url = "http://192.168.201.163:3001/api/tweets";
+    private String url = "http://192.168.153.38:8080/api/tweets";
 
     public TweetsDataService() {
         this.requester = new HttpRequester();
@@ -36,7 +38,6 @@ public class TweetsDataService {
 
                 try {
                     response = requester.runGeneric(url, TweetsResponse.class);
-//                    response = requester.runGeneric(url, TweetsResponse.class);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -47,18 +48,29 @@ public class TweetsDataService {
                 List<Tweet> tweets = response.getResult();
                 getAllFinishedCallback.apply(tweets);
                 return null;
+            }
+        };
 
-//                String json = null;
-//                try {
-//                    json = requester.run(url);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//
-//                Gson gson = new Gson();
-//                List<Tweet> tweets = gson.fromJson(json, TweetsResponse.class).getResult();
-//                getAllFinishedCallback.apply(tweets);
-//                return null;
+        this.getById = new AsyncTask<Integer, Void, Void>() {
+            @Override
+            protected Void doInBackground(Integer... params) {
+                int id = params[0];
+                if(getByIdFinishedCallback == null){
+                    return null;
+                }
+                ResponseWithResult<Tweet> response = null;
+
+                try {
+                    String newUrl = url + "/" + id;
+                    response = requester.runGeneric(newUrl, TweetDetailsResponse.class);
+                }
+                catch(IOException e){
+                    e.printStackTrace();
+                }
+
+                Tweet tweetDetails = response.getResult();
+                getByIdFinishedCallback.apply(tweetDetails);
+                return null;
             }
         };
     }
@@ -69,5 +81,13 @@ public class TweetsDataService {
 
     public void setGetAllFinishedCallback(Function<List<Tweet>, Void> getAllFinishedCallback) {
         this.getAllFinishedCallback = getAllFinishedCallback;
+    }
+
+    public void setGetByIdFinishedCallback(Function<Tweet, Void> getByIdFinishedCallback) {
+        this.getByIdFinishedCallback = getByIdFinishedCallback;
+    }
+
+    public AsyncTask<Integer, Void, Void> getGetById() {
+        return getById;
     }
 }

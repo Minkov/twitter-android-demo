@@ -1,5 +1,6 @@
 package com.minkov.twitterapp.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
@@ -20,7 +21,7 @@ import java.util.Objects;
 
 public class TweetsActivity extends AppCompatActivity {
 
-    private TweetsDataService tweetsDataService;
+    private TweetsDataService service;
     private ArrayAdapter<Tweet> adapter;
 
     @Override
@@ -33,11 +34,19 @@ public class TweetsActivity extends AppCompatActivity {
 
         ListView tweetsListView = (ListView) this.findViewById(R.id.listview_tweets);
 
-        this.adapter = new TweetTextArrayAdapter(this, new ArrayList<Tweet>());
+        this.adapter = new TweetTextArrayAdapter(this, new ArrayList<>());
 
         tweetsListView.setAdapter(adapter);
+        tweetsListView.setOnItemClickListener((parent, view, position, id) -> {
+            Intent intent = new Intent(this, TweetDetailsActivity.class);
+            Tweet tweet = adapter.getItem(position);
+            intent.putExtra("tweet", tweet);
 
-        TweetsDataService service = new TweetsDataService();
+            startActivity(intent);
+        });
+
+        this.service = new TweetsDataService();
+
         service.setGetAllFinishedCallback((value) -> {
             this.updateAllTweets(value);
             return null;
@@ -48,9 +57,9 @@ public class TweetsActivity extends AppCompatActivity {
 
     @NonNull
     private void updateAllTweets(List<Tweet> tweets) {
-        Stream.of(tweets)
-                .forEach(this.adapter::add);
         this.runOnUiThread(() -> {
+            Stream.of(tweets)
+                .forEach(this.adapter::add);
             adapter.notifyDataSetChanged();
         });
     }

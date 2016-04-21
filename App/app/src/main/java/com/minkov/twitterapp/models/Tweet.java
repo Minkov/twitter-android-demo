@@ -1,12 +1,15 @@
 package com.minkov.twitterapp.models;
 
+import java.io.Serializable;
+
 /**
  * Created by dminkov on 4/14/2016.
  */
-public class Tweet {
+public class Tweet implements Serializable {
 
     private int id;
     private String text;
+    private Author author;
 
     public static Tweet build(int id, String text) {
         Tweet tweet = new Tweet();
