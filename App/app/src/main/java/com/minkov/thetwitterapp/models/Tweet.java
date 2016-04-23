@@ -1,21 +1,19 @@
-package com.minkov.twitterapp.models;
+package com.minkov.thetwitterapp.models;
 
 import java.io.Serializable;
 
 /**
- * Created by dminkov on 4/14/2016.
+ * Created by dminkov on 4/22/2016.
  */
 public class Tweet implements Serializable {
-
     private int id;
     private String text;
-    private Author author;
+    private String author;
 
-    public static Tweet build(int id, String text) {
-        Tweet tweet = new Tweet();
-        tweet.setId(id);
-        tweet.setText(text);
-        return tweet;
+    public Tweet(int id, String text, String author){
+        this.setId(id);
+        this.setText(text);
+        this.setAuthor(author);
     }
 
     public int getId() {
@@ -32,5 +30,13 @@ public class Tweet implements Serializable {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
     }
 }

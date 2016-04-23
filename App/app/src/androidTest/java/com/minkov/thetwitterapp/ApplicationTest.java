@@ -1,4 +1,4 @@
-package com.minkov.twitterapp;
+package com.minkov.thetwitterapp;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
